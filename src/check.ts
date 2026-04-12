@@ -114,16 +114,34 @@ function diff(current: ClassEvent[], state: State): Notification[] {
   return notifications;
 }
 
-async function sendSms(body: string): Promise<void> {
+async function sendNtfy(body: string, title: string): Promise<void> {
+  const topic = process.env.NTFY_TOPIC;
+  if (!topic) throw new Error('Missing NTFY_TOPIC');
+
+  const res = await fetch(`https://ntfy.sh/${topic}`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'text/plain; charset=utf-8',
+      Title: title,
+      Tags: 'car',
+      Click: 'https://ncdrivingschool.com/county/brunswick/north-brunswick-high-school/'
+    },
+    body
+  });
+
+  if (!res.ok) {
+    throw new Error(`ntfy failed: ${res.status} ${await res.text()}`);
+  }
+}
+
+async function sendEmail(body: string, subject: string): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY;
   const from = process.env.RESEND_FROM;
-  const phone = process.env.PHONE_NUMBER; // digits only, e.g. "9105551234"
+  const to = process.env.NOTIFY_EMAIL;
 
-  if (!apiKey || !from || !phone) {
-    throw new Error('Missing RESEND_API_KEY, RESEND_FROM, or PHONE_NUMBER');
+  if (!apiKey || !from || !to) {
+    throw new Error('Missing RESEND_API_KEY, RESEND_FROM, or NOTIFY_EMAIL');
   }
-
-  const to = `${phone}@tmomail.net`;
 
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',
@@ -131,12 +149,7 @@ async function sendSms(body: string): Promise<void> {
       Authorization: `Bearer ${apiKey}`,
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({
-      from,
-      to,
-      subject: 'NBHS Drivers Ed Check Update',
-      text: body
-    })
+    body: JSON.stringify({ from, to, subject, text: body })
   });
 
   if (!res.ok) {
@@ -145,12 +158,11 @@ async function sendSms(body: string): Promise<void> {
 }
 
 function formatNotifications(notifications: Notification[]): string {
-  // SMS gateways truncate long messages, so keep this tight.
   const lines = notifications.map((n) => {
     const tag = n.reason === 'new' ? 'NEW' : 'OPEN';
-    return `[${tag}] ${n.event.title}`;
+    return `[${tag}] ${n.event.title}\n${n.event.url}`;
   });
-  return ['NCDS North Brunswick:', ...lines].join('\n');
+  return ['NCDS North Brunswick:', ...lines].join('\n\n');
 }
 
 async function main(): Promise<void> {
@@ -163,8 +175,24 @@ async function main(): Promise<void> {
   if (notifications.length > 0) {
     console.log(`Sending ${notifications.length} notification(s)`);
     const body = formatNotifications(notifications);
+    const subject = `NCDS: ${notifications.length} update${notifications.length === 1 ? '' : 's'}`;
     console.log(body);
-    await sendSms(body);
+
+    // Send both in parallel; if one fails, still try the other.
+    const results = await Promise.allSettled([
+      sendNtfy(body, subject),
+      sendEmail(body, subject)
+    ]);
+    const failures = results.filter((r) => r.status === 'rejected');
+    if (failures.length > 0) {
+      for (const f of failures) {
+        console.error('Notification channel failed:', (f as PromiseRejectedResult).reason);
+      }
+      // Only hard-fail if BOTH channels failed.
+      if (failures.length === results.length) {
+        throw new Error('All notification channels failed');
+      }
+    }
   } else {
     console.log('No changes');
   }
