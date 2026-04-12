@@ -15,7 +15,7 @@ You get one text per change:
 - **NEW** — a class slug we've never seen before
 - **OPEN** — a previously sold-out class now has spots
 
-If a class shows up brand new *and* available, it fires once as NEW (not twice).
+If a class shows up brand new _and_ available, it fires once as NEW (not twice).
 If a class goes available → sold out → available again, it re-fires.
 
 ## Setup

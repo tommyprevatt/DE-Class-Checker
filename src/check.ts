@@ -26,7 +26,7 @@ interface State {
 
 async function scrape(): Promise<ClassEvent[]> {
   const res = await fetch(PAGE_URL, {
-    headers: { 'User-Agent': 'ncds-watcher/1.0' },
+    headers: { 'User-Agent': 'ncds-watcher/1.0' }
   });
   if (!res.ok) throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
   const html = await res.text();
@@ -88,7 +88,7 @@ function diff(current: ClassEvent[], state: State): Notification[] {
         // If it appears already available, the "new" alert covers it —
         // mark as already-notified so we don't double-fire next run.
         notifiedAvailable: !ev.soldOut,
-        firstSeen: nowIso,
+        firstSeen: nowIso
       };
       continue;
     }
@@ -125,14 +125,14 @@ async function sendSms(body: string): Promise<void> {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json',
+      'Content-Type': 'application/json'
     },
     body: JSON.stringify({
       from,
       to,
-      subject: 'NCDS',
-      text: body,
-    }),
+      subject: 'NBHS Drivers Ed Check Update',
+      text: body
+    })
   });
 
   if (!res.ok) {
