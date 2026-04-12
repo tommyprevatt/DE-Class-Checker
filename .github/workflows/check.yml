@@ -43,3 +43,14 @@ jobs:
             git commit -m "Update state [skip ci]"
             git push
           fi
+
+      - name: Notify ntfy on failure
+        if: failure()
+        run: |
+          curl -sS \
+            -H "Title: NCDS watcher FAILED" \
+            -H "Priority: high" \
+            -H "Tags: warning" \
+            -H "Click: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" \
+            -d "Run ${{ github.run_id }} failed. Tap to view logs." \
+            https://ntfy.sh/${{ secrets.NTFY_TOPIC }}
