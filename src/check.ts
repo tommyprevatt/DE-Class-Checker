@@ -209,13 +209,6 @@ async function main(): Promise<void> {
         'urgent',
         'rotating_light'
       );
-    } else {
-      await dispatchNotifications(
-        'Scraper returned 0 classes this run. Will alert urgently if it happens again next run.',
-        'NCDS: zero classes found',
-        'default',
-        'warning'
-      );
     }
 
     state.lastChecked = new Date().toISOString();
