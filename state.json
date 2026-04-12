@@ -1,1 +1,15 @@
-{}
+{
+  "events": {
+    "march-9-march-26-2026-430pm-700pm-no-class-on-fridays": {
+      "soldOut": true,
+      "notifiedAvailable": false,
+      "firstSeen": "2026-04-12T11:25:25.308Z"
+    },
+    "march-9-march-26-2026-700pm-930pm-no-class-on-fridays-2": {
+      "soldOut": true,
+      "notifiedAvailable": false,
+      "firstSeen": "2026-04-12T11:25:25.308Z"
+    }
+  },
+  "lastChecked": "2026-04-12T11:25:25.468Z"
+}
