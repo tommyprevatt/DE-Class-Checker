@@ -9,8 +9,13 @@
       "soldOut": true,
       "notifiedAvailable": false,
       "firstSeen": "2026-04-12T11:25:25.308Z"
+    },
+    "april-13-april-30-2026-430pm-700pm-no-class-on-fridays": {
+      "soldOut": false,
+      "notifiedAvailable": true,
+      "firstSeen": "2026-04-14T14:38:38.383Z"
     }
   },
-  "lastChecked": "2026-04-14T13:37:06.428Z",
-  "consecutiveZero": 2
+  "lastChecked": "2026-04-14T14:38:38.697Z",
+  "consecutiveZero": 0
 }
