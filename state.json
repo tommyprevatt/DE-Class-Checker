@@ -16,8 +16,8 @@
       "firstSeen": "2026-04-14T14:38:38.383Z"
     },
     "may-4-may-21-2026-700pm-930pm-no-class-on-fridays": {
-      "soldOut": false,
-      "notifiedAvailable": true,
+      "soldOut": true,
+      "notifiedAvailable": false,
       "firstSeen": "2026-04-15T13:36:36.094Z"
     },
     "june-15-june-26-2026-800am-1100am": {
@@ -36,6 +36,6 @@
       "firstSeen": "2026-04-17T12:49:54.906Z"
     }
   },
-  "lastChecked": "2026-04-29T21:26:54.971Z",
+  "lastChecked": "2026-04-29T21:51:38.088Z",
   "consecutiveZero": 0
 }
