@@ -1,12 +1,12 @@
-name: Check NCDS classes
+name: Check South HS classes
 
 on:
   schedule:
-    # Every 30 min, 10:00-23:59 UTC, which is 6 AM - 7:59 PM EDT (UTC-4).
+    # Every 10 min, 10:00-23:59 UTC, which is 6 AM - 7:59 PM EDT (UTC-4).
     # When DST ends (early Nov), this effectively becomes 5 AM - 6:59 PM EST.
     # Revisit and bump to '11-23' + '0' if you want to hold the 6 AM start year-round.
     # GitHub cron can lag a few minutes under load.
-    - cron: '*/30 10-23 * * *'
+    - cron: '*/10 10-23 * * *'
     - cron: '0 0 * * *'
   workflow_dispatch:
 
@@ -27,9 +27,6 @@ jobs:
 
       - run: npm run check
         env:
-          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-          RESEND_FROM: ${{ secrets.RESEND_FROM }}
-          NOTIFY_EMAIL: ${{ secrets.NOTIFY_EMAIL }}
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}
 
       - name: Commit updated state
@@ -48,7 +45,7 @@ jobs:
         if: failure()
         run: |
           curl -sS \
-            -H "Title: NCDS watcher FAILED" \
+            -H "Title: South HS watcher FAILED" \
             -H "Priority: high" \
             -H "Tags: warning" \
             -H "Click: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}" \

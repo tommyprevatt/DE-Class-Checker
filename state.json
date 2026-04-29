@@ -1,41 +1,5 @@
 {
-  "events": {
-    "march-9-march-26-2026-430pm-700pm-no-class-on-fridays": {
-      "soldOut": true,
-      "notifiedAvailable": false,
-      "firstSeen": "2026-04-12T11:25:25.308Z"
-    },
-    "march-9-march-26-2026-700pm-930pm-no-class-on-fridays-2": {
-      "soldOut": true,
-      "notifiedAvailable": false,
-      "firstSeen": "2026-04-12T11:25:25.308Z"
-    },
-    "april-13-april-30-2026-430pm-700pm-no-class-on-fridays": {
-      "soldOut": true,
-      "notifiedAvailable": false,
-      "firstSeen": "2026-04-14T14:38:38.383Z"
-    },
-    "may-4-may-21-2026-700pm-930pm-no-class-on-fridays": {
-      "soldOut": false,
-      "notifiedAvailable": true,
-      "firstSeen": "2026-04-15T13:36:36.094Z"
-    },
-    "june-15-june-26-2026-800am-1100am": {
-      "soldOut": false,
-      "notifiedAvailable": true,
-      "firstSeen": "2026-04-15T13:36:36.094Z"
-    },
-    "june-15-june-26-2026-1130am-230pm": {
-      "soldOut": false,
-      "notifiedAvailable": true,
-      "firstSeen": "2026-04-17T12:49:54.906Z"
-    },
-    "july-13-july-24-2026-800am-1100am": {
-      "soldOut": false,
-      "notifiedAvailable": true,
-      "firstSeen": "2026-04-17T12:49:54.906Z"
-    }
-  },
-  "lastChecked": "2026-04-29T15:42:57.266Z",
-  "consecutiveZero": 1
+  "events": {},
+  "lastChecked": "",
+  "consecutiveZero": 0
 }

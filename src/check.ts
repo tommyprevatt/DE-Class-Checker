@@ -3,7 +3,7 @@ import { readFile, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 
 const PAGE_URL =
-  'https://ncdrivingschool.com/county/brunswick/north-brunswick-high-school/';
+  'https://ncdrivingschool.com/county/brunswick/south-brunswick-high-school/';
 const STATE_PATH = 'state.json';
 
 interface ClassEvent {
@@ -27,7 +27,7 @@ interface State {
 
 async function scrape(): Promise<ClassEvent[]> {
   const res = await fetch(PAGE_URL, {
-    headers: { 'User-Agent': 'ncds-watcher/1.0' }
+    headers: { 'User-Agent': 'south-hs-watcher/1.0' }
   });
   if (!res.ok) throw new Error(`Fetch failed: ${res.status} ${res.statusText}`);
   const html = await res.text();
@@ -132,7 +132,7 @@ async function sendNtfy(
       Title: title,
       Tags: tags,
       Priority: priority,
-      Click: 'https://ncdrivingschool.com/county/brunswick/north-brunswick-high-school/'
+      Click: PAGE_URL
     },
     body
   });
@@ -142,54 +142,12 @@ async function sendNtfy(
   }
 }
 
-async function sendEmail(body: string, subject: string): Promise<void> {
-  const apiKey = process.env.RESEND_API_KEY;
-  const from = process.env.RESEND_FROM;
-  const to = process.env.NOTIFY_EMAIL;
-
-  if (!apiKey || !from || !to) {
-    throw new Error('Missing RESEND_API_KEY, RESEND_FROM, or NOTIFY_EMAIL');
-  }
-
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${apiKey}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ from, to, subject, text: body })
-  });
-
-  if (!res.ok) {
-    throw new Error(`Resend failed: ${res.status} ${await res.text()}`);
-  }
-}
-
 function formatNotifications(notifications: Notification[]): string {
   const lines = notifications.map((n) => {
     const tag = n.reason === 'new' ? 'NEW' : 'OPEN';
     return `[${tag}] ${n.event.title}\n${n.event.url}`;
   });
-  return ['NCDS North Brunswick:', ...lines].join('\n\n');
-}
-
-async function dispatchNotifications(
-  body: string,
-  title: string,
-  priority: 'default' | 'high' | 'urgent' = 'default',
-  tags = 'car'
-): Promise<void> {
-  const results = await Promise.allSettled([
-    sendNtfy(body, title, priority, tags),
-    sendEmail(body, title)
-  ]);
-  const failures = results.filter((r) => r.status === 'rejected');
-  for (const f of failures) {
-    console.error('Notification channel failed:', (f as PromiseRejectedResult).reason);
-  }
-  if (failures.length === results.length) {
-    throw new Error('All notification channels failed');
-  }
+  return ['South HS:', ...lines].join('\n\n');
 }
 
 async function main(): Promise<void> {
@@ -203,9 +161,9 @@ async function main(): Promise<void> {
     console.log(`Zero-class run (streak: ${state.consecutiveZero})`);
 
     if (state.consecutiveZero >= 2) {
-      await dispatchNotifications(
-        `Scraper has returned 0 classes for ${state.consecutiveZero} runs in a row. The site markup may have changed, or the page is broken. Investigate ASAP:\n\nhttps://ncdrivingschool.com/county/brunswick/north-brunswick-high-school/`,
-        `NCDS: ${state.consecutiveZero} ZERO-CLASS RUNS`,
+      await sendNtfy(
+        `Scraper has returned 0 classes for ${state.consecutiveZero} runs in a row. The site markup may have changed, or the page is broken. Investigate ASAP:\n\n${PAGE_URL}`,
+        `South HS: ${state.consecutiveZero} ZERO-CLASS RUNS`,
         'urgent',
         'rotating_light'
       );
@@ -224,9 +182,9 @@ async function main(): Promise<void> {
   if (notifications.length > 0) {
     console.log(`Sending ${notifications.length} notification(s)`);
     const body = formatNotifications(notifications);
-    const subject = `NCDS: ${notifications.length} update${notifications.length === 1 ? '' : 's'}`;
+    const subject = `South HS: ${notifications.length} update${notifications.length === 1 ? '' : 's'}`;
     console.log(body);
-    await dispatchNotifications(body, subject);
+    await sendNtfy(body, subject);
   } else {
     console.log('No changes');
   }
