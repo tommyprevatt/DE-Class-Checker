@@ -15,12 +15,13 @@ interface ClassEvent {
 
 interface StoredEvent {
   status: string;
-  notifiedActive: boolean;
   firstSeen: string;
 }
 
-function isActive(status: string): boolean {
-  return /^active$/i.test(status.trim());
+// Heuristic: does the status text look like registration is open?
+// We don't know the exact wording the site will use, so cast a wide net.
+function isLikelyOpen(status: string): boolean {
+  return /\b(active|open|register|on\s*sale|available|sale)\b/i.test(status);
 }
 
 interface State {
@@ -83,8 +84,9 @@ async function saveState(state: State): Promise<void> {
 }
 
 interface Notification {
-  reason: 'new' | 'available';
+  reason: 'new' | 'changed';
   event: ClassEvent;
+  prevStatus?: string;
 }
 
 function diff(current: ClassEvent[], state: State): Notification[] {
@@ -93,31 +95,17 @@ function diff(current: ClassEvent[], state: State): Notification[] {
 
   for (const ev of current) {
     const prev = state.events[ev.slug];
-    const active = isActive(ev.status);
 
     if (!prev) {
       notifications.push({ reason: 'new', event: ev });
-      state.events[ev.slug] = {
-        status: ev.status,
-        // If it appears already Active, the "new" alert covers it —
-        // mark as already-notified so we don't double-fire next run.
-        notifiedActive: active,
-        firstSeen: nowIso
-      };
+      state.events[ev.slug] = { status: ev.status, firstSeen: nowIso };
       continue;
     }
 
-    if (active && !prev.notifiedActive) {
-      notifications.push({ reason: 'available', event: ev });
-      prev.notifiedActive = true;
+    if (ev.status !== prev.status) {
+      notifications.push({ reason: 'changed', event: ev, prevStatus: prev.status });
+      prev.status = ev.status;
     }
-
-    // Left Active state — reset so a future re-activation re-fires.
-    if (!active && prev.notifiedActive) {
-      prev.notifiedActive = false;
-    }
-
-    prev.status = ev.status;
   }
 
   return notifications;
@@ -149,11 +137,20 @@ async function sendNtfy(
   }
 }
 
+function tagFor(n: Notification): string {
+  if (n.reason === 'new') return 'NEW';
+  return isLikelyOpen(n.event.status) ? 'OPEN' : 'CHANGED';
+}
+
 function formatNotifications(notifications: Notification[]): string {
   const lines = notifications.map((n) => {
-    const tag = n.reason === 'new' ? 'NEW' : 'OPEN';
-    const status = n.event.status ? ` (${n.event.status})` : '';
-    return `[${tag}]${status} ${n.event.title}\n${n.event.url}`;
+    const tag = tagFor(n);
+    const status = n.event.status || '(no status)';
+    const transition =
+      n.reason === 'changed' && n.prevStatus !== undefined
+        ? `${n.prevStatus || '(none)'} → ${status}`
+        : status;
+    return `[${tag}] ${transition}: ${n.event.title}\n${n.event.url}`;
   });
   return ['South HS:', ...lines].join('\n\n');
 }
@@ -192,7 +189,12 @@ async function main(): Promise<void> {
     const body = formatNotifications(notifications);
     const subject = `South HS: ${notifications.length} update${notifications.length === 1 ? '' : 's'}`;
     console.log(body);
-    await sendNtfy(body, subject);
+    // If any notification looks like registration just opened, bump priority
+    // so the phone makes the loud noise.
+    const opened = notifications.some(
+      (n) => n.reason === 'changed' && isLikelyOpen(n.event.status)
+    );
+    await sendNtfy(body, subject, opened ? 'high' : 'default');
   } else {
     console.log('No changes');
   }
