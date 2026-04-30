@@ -17,7 +17,7 @@
       "firstSeen": "2026-04-29T16:25:40.482Z"
     },
     "june-15-june-26-2026-800am-1100am": {
-      "status": "Upcoming",
+      "status": "Sold Out",
       "firstSeen": "2026-04-29T16:25:40.482Z"
     },
     "june-15-june-26-2026-1130am-230pm": {
@@ -29,6 +29,6 @@
       "firstSeen": "2026-04-29T16:25:40.482Z"
     }
   },
-  "lastChecked": "2026-04-29T23:55:18.503Z",
-  "consecutiveZero": 1
+  "lastChecked": "2026-04-30T00:00:25.407Z",
+  "consecutiveZero": 0
 }
