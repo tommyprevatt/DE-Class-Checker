@@ -1,13 +1,13 @@
 name: Check NCDS classes
 
 on:
-  schedule:
+  #schedule:
     # Every 30 min, 10:00-23:59 UTC, which is 6 AM - 7:59 PM EDT (UTC-4).
     # When DST ends (early Nov), this effectively becomes 5 AM - 6:59 PM EST.
     # Revisit and bump to '11-23' + '0' if you want to hold the 6 AM start year-round.
     # GitHub cron can lag a few minutes under load.
-    - cron: '*/30 10-23 * * *'
-    - cron: '0 0 * * *'
+   # - cron: '*/30 10-23 * * *'
+    #- cron: '0 0 * * *'
   workflow_dispatch:
 
 jobs:
